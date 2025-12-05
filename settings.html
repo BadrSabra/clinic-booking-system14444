@@ -1,0 +1,203 @@
+<!-- ملف: settings.html -->
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعدادات النظام</title>
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .setting-group {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .setting-group h3 {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .setting-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .save-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <h1><i class="fas fa-cog"></i> إعدادات النظام</h1>
+        
+        <div class="setting-group">
+            <h3><i class="fas fa-hospital"></i> معلومات العيادة</h3>
+            <div class="setting-item">
+                <label>اسم العيادة:</label>
+                <input type="text" id="clinicName" value="عيادة النخبة الطبية">
+            </div>
+            <div class="setting-item">
+                <label>رقم الهاتف الرئيسي:</label>
+                <input type="tel" id="clinicPhone" value="0551234567">
+            </div>
+            <div class="setting-item">
+                <label>رقم واتساب للاستقبال:</label>
+                <input type="tel" id="whatsappNumber" value="0551234567">
+            </div>
+        </div>
+        
+        <div class="setting-group">
+            <h3><i class="fas fa-user-md"></i> قائمة الأطباء</h3>
+            <div id="doctorsList">
+                <!-- سيتم تعبئتها تلقائياً -->
+            </div>
+            <button onclick="addDoctor()" style="background: #28a745; color: white; padding: 8px 15px; border: none; border-radius: 5px; margin-top: 10px;">
+                <i class="fas fa-plus"></i> إضافة طبيب
+            </button>
+        </div>
+        
+        <div class="setting-group">
+            <h3><i class="fas fa-clock"></i> أوقات العمل</h3>
+            <div class="setting-item">
+                <label>وقت بداية اليوم:</label>
+                <input type="time" id="startTime" value="09:00">
+            </div>
+            <div class="setting-item">
+                <label>وقت نهاية اليوم:</label>
+                <input type="time" id="endTime" value="17:00">
+            </div>
+            <div class="setting-item">
+                <label>مدة كل موعد (دقائق):</label>
+                <select id="slotDuration">
+                    <option value="15">15 دقيقة</option>
+                    <option value="30" selected>30 دقيقة</option>
+                    <option value="45">45 دقيقة</option>
+                    <option value="60">60 دقيقة</option>
+                </select>
+            </div>
+        </div>
+        
+        <button class="save-btn" onclick="saveSettings()">
+            <i class="fas fa-save"></i> حفظ الإعدادات
+        </button>
+    </div>
+
+    <script>
+        // تحميل الإعدادات
+        let settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+        
+        // تعيين القيم الافتراضية
+        if (!settings.clinicName) {
+            settings = {
+                clinicName: 'عيادة النخبة الطبية',
+                clinicPhone: '0551234567',
+                whatsappNumber: '0551234567',
+                doctors: [
+                    { name: 'د. أحمد محمد', specialty: 'أسنان' },
+                    { name: 'د. سارة علي', specialty: 'باطنة' },
+                    { name: 'د. خالد حسن', specialty: 'عيون' }
+                ],
+                startTime: '09:00',
+                endTime: '17:00',
+                slotDuration: 30
+            };
+            localStorage.setItem('clinic_settings', JSON.stringify(settings));
+        }
+        
+        // تعبئة النموذج
+        document.getElementById('clinicName').value = settings.clinicName;
+        document.getElementById('clinicPhone').value = settings.clinicPhone;
+        document.getElementById('whatsappNumber').value = settings.whatsappNumber;
+        document.getElementById('startTime').value = settings.startTime;
+        document.getElementById('endTime').value = settings.endTime;
+        document.getElementById('slotDuration').value = settings.slotDuration;
+        
+        // عرض قائمة الأطباء
+        function displayDoctors() {
+            const container = document.getElementById('doctorsList');
+            container.innerHTML = '';
+            
+            settings.doctors.forEach((doctor, index) => {
+                const div = document.createElement('div');
+                div.className = 'setting-item';
+                div.innerHTML = `
+                    <input type="text" value="${doctor.name}" onchange="updateDoctor(${index}, 'name', this.value)" placeholder="اسم الطبيب">
+                    <input type="text" value="${doctor.specialty}" onchange="updateDoctor(${index}, 'specialty', this.value)" placeholder="التخصص" style="width: 150px;">
+                    <button onclick="removeDoctor(${index})" style="background: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 5px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function addDoctor() {
+            settings.doctors.push({ name: 'طبيب جديد', specialty: 'تخصص' });
+            displayDoctors();
+        }
+        
+        function updateDoctor(index, field, value) {
+            settings.doctors[index][field] = value;
+        }
+        
+        function removeDoctor(index) {
+            if (confirm('هل تريد حذف هذا الطبيب؟')) {
+                settings.doctors.splice(index, 1);
+                displayDoctors();
+            }
+        }
+        
+        function saveSettings() {
+            // جمع البيانات من النموذج
+            settings.clinicName = document.getElementById('clinicName').value;
+            settings.clinicPhone = document.getElementById('clinicPhone').value;
+            settings.whatsappNumber = document.getElementById('whatsappNumber').value;
+            settings.startTime = document.getElementById('startTime').value;
+            settings.endTime = document.getElementById('endTime').value;
+            settings.slotDuration = parseInt(document.getElementById('slotDuration').value);
+            
+            // حفظ في localStorage
+            localStorage.setItem('clinic_settings', JSON.stringify(settings));
+            
+            // تحديث صفحة الحجز
+            updateBookingPage();
+            
+            alert('تم حفظ الإعدادات بنجاح');
+        }
+        
+        function updateBookingPage() {
+            // تحديث قائمة الأطباء في صفحة الحجز
+            const bookingPage = localStorage.getItem('booking_page');
+            if (bookingPage) {
+                // كود لتحديث صفحة الحجز هنا
+            }
+        }
+        
+        // عرض الأطباء عند تحميل الصفحة
+        displayDoctors();
+    </script>
+</body>
+</html>
