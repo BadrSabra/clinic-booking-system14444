@@ -1,0 +1,337 @@
+<!-- ملف: booking.html -->
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز مواعيد - [اسم العيادة]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .time-slot {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .time-slot.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .time-slot.booked {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+            cursor: not-allowed;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .whatsapp-btn {
+            background: #25D366;
+            margin-top: 10px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .logo {
+            max-width: 150px;
+            margin: 0 auto 20px;
+            display: block;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- شعار العيادة -->
+        <img src="https://via.placeholder.com/150x50/667eea/ffffff?text=Clinic+Logo" 
+             alt="شعار العيادة" class="logo">
+        
+        <div class="header">
+            <h1><i class="fas fa-calendar-check"></i> حجز موعد طبي</h1>
+            <p>اختر موعدك المناسب واحجزه في دقائق</p>
+        </div>
+        
+        <form id="bookingForm">
+            <div class="form-group">
+                <label for="name"><i class="fas fa-user"></i> الاسم الكامل</label>
+                <input type="text" id="name" placeholder="أدخل اسمك الثلاثي" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone"><i class="fas fa-phone"></i> رقم الهاتف</label>
+                <input type="tel" id="phone" placeholder="05XXXXXXXX" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="doctor"><i class="fas fa-user-md"></i> اختر الطبيب</label>
+                <select id="doctor" required>
+                    <option value="">-- اختر الطبيب --</option>
+                    <option value="د. أحمد محمد - أسنان">د. أحمد محمد - أسنان</option>
+                    <option value="د. سارة علي - باطنة">د. سارة علي - باطنة</option>
+                    <option value="د. خالد حسن - عيون">د. خالد حسن - عيون</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="date"><i class="fas fa-calendar-alt"></i> تاريخ الموعد</label>
+                <input type="date" id="date" required>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-clock"></i> اختر الوقت</label>
+                <div class="time-slots" id="timeSlots">
+                    <!-- سيتم تعبئة الأوقات تلقائياً -->
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes"><i class="fas fa-notes-medical"></i> ملاحظات (اختياري)</label>
+                <textarea id="notes" rows="3" placeholder="أي أعراض أو ملاحظات تريد إبلاغ الطبيب بها..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn">
+                <i class="fas fa-check-circle"></i> تأكيد الحجز
+            </button>
+            
+            <button type="button" class="btn whatsapp-btn" id="whatsappBtn">
+                <i class="fab fa-whatsapp"></i> حجز عبر واتساب
+            </button>
+        </form>
+        
+        <div id="successMessage" class="success-message">
+            <i class="fas fa-check-circle"></i>
+            <h3>تم الحجز بنجاح!</h3>
+            <p>سيتم التواصل معك لتأكيد الموعد</p>
+        </div>
+    </div>
+
+    <script>
+        // توليد الأوقات المتاحة
+        function generateTimeSlots() {
+            const slots = ['09:00', '10:00', '11:00', '12:00', 
+                          '14:00', '15:00', '16:00', '17:00'];
+            const container = document.getElementById('timeSlots');
+            
+            slots.forEach(slot => {
+                const div = document.createElement('div');
+                div.className = 'time-slot';
+                div.textContent = slot;
+                div.dataset.time = slot;
+                
+                div.addEventListener('click', function() {
+                    // إلغاء تحديد جميع الأوقات
+                    document.querySelectorAll('.time-slot').forEach(s => {
+                        s.classList.remove('selected');
+                    });
+                    // تحديد الوقت المختار
+                    this.classList.add('selected');
+                    selectedTime = slot;
+                });
+                
+                container.appendChild(div);
+            });
+        }
+        
+        // تعيين الحد الأدنى للتاريخ (اليوم)
+        document.getElementById('date').min = new Date().toISOString().split('T')[0];
+        
+        // تعيين الحد الأقصى (شهر من الآن)
+        const maxDate = new Date();
+        maxDate.setMonth(maxDate.getMonth() + 1);
+        document.getElementById('date').max = maxDate.toISOString().split('T')[0];
+        
+        let selectedTime = '';
+        
+        // توليد الأوقات عند تحميل الصفحة
+        generateTimeSlots();
+        
+        // معالجة نموذج الحجز
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const doctor = document.getElementById('doctor').value;
+            const date = document.getElementById('date').value;
+            const notes = document.getElementById('notes').value;
+            
+            if (!selectedTime) {
+                alert('يرجى اختيار وقت للموعد');
+                return;
+            }
+            
+            // حفظ الحجز في LocalStorage
+            const booking = {
+                id: Date.now(),
+                name,
+                phone,
+                doctor,
+                date,
+                time: selectedTime,
+                notes,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+            
+            let bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            bookings.push(booking);
+            localStorage.setItem('clinic_bookings', JSON.stringify(booking));
+            
+            // إرسال إشعار واتساب
+            const whatsappMessage = `🌟 حجز موعد جديد 🌟
+            
+👤 المريض: ${name}
+📞 الهاتف: ${phone}
+👨‍⚕️ الطبيب: ${doctor}
+📅 التاريخ: ${date}
+⏰ الوقت: ${selectedTime}
+📝 الملاحظات: ${notes || 'لا توجد'}
+
+📋 رقم الحجز: #${booking.id}`;
+            
+            // إرسال إلى رقم الطبيب
+            const whatsappUrl = `https://wa.me/966501234567?text=${encodeURIComponent(whatsappMessage)}`;
+            window.open(whatsappUrl, '_blank');
+            
+            // إرسال تأكيد للمريض
+            const patientMessage = `✅ تم تأكيد حجز موعدك
+            رقم الحجز: #${booking.id}
+            سنتواصل معك قبل الموعد بـ 24 ساعة`;
+            
+            const patientWhatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(patientMessage)}`;
+            window.open(patientWhatsappUrl, '_blank');
+            
+            // عرض رسالة النجاح
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('bookingForm').reset();
+            
+            // إعادة تعيين التحديد
+            document.querySelectorAll('.time-slot').forEach(s => {
+                s.classList.remove('selected');
+            });
+            selectedTime = '';
+            
+            // إعادة تحميل الصفحة بعد 3 ثوان
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 5000);
+        });
+        
+        // زر الحجز عبر واتساب مباشرة
+        document.getElementById('whatsappBtn').addEventListener('click', function() {
+            const whatsappUrl = `https://wa.me/966501234567?text=${encodeURIComponent('أريد حجز موعد في العيادة')}`;
+            window.open(whatsappUrl, '_blank');
+        });
+    </script>
+</body>
+</html>
